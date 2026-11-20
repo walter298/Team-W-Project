@@ -29,7 +29,7 @@ dt = 1/60
 error_std = 30
 x_est = np.array([295, 100]) # Our initial estimate
 F = np.array([[1, dt],  # State transition matrix
-              [0, 0.99]])
+              [0, 1]])
 P_est = np.array([[10, 0],   # Process covariance matrix
                   [0, 1000]])
 H = np.array([1, 0])         # Map hidden state to observation
@@ -62,11 +62,16 @@ last_recorded_time = pygame.time.get_ticks()
 running = True
 steps = 0
 
+max_steps = 150
+count_max = True
+
 while running: 
     events = pygame.event.get()
     # Handle events (such as clicking the window close button)
     for event in events:
         if event.type == pygame.QUIT:
+            running = False
+        if (count_max) and (steps >= max_steps):
             running = False
 
     # Fill the screen with white (RGB)
@@ -74,9 +79,9 @@ while running:
     #output.setText(slider.getValue())
  
     # Update the hidden state
-    _, mouse_y = pygame.mouse.get_pos()
-    #x_true = F @ x_true
-    x_true[0] = mouse_y
+    #_, mouse_y = pygame.mouse.get_pos()
+    x_true = F @ x_true
+    #x_true[0] = mouse_y
 
     # Predict Step: Update estimate and process covariance
     x_pred = F @ x_est
@@ -139,17 +144,17 @@ while running:
 # 3. Clean up and exit
 pygame.quit()
 
-size = 10
+size = 3
 x_plt = np.arange(1, len(ground_truth)+1)
 plt.scatter(x_plt, ground_truth, c = (0, 0, 1), label = "Ground Truth", s = size)
 plt.scatter(x_plt, kalman_preds, c = (1, 0, 0), label = "Kalman Prediction", s = size)
-plt.scatter(x_plt, ma_preds, c = (0, 1, 0), label = "Moving Average Prediction", s = size)
+#plt.scatter(x_plt, ma_preds, c = (0, 1, 0), label = "Moving Average Prediction", s = size)
 plt.scatter(x_plt, reg_preds, c = (0, 1, 1), label = "Regression Prediction", s = size)
 
-#plt.legend(loc='outside upper left')
+plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
+plt.subplots_adjust(right=0.75)
 
 plt.show()
-
 
 
 ### Quantify Error
