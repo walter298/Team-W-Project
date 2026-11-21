@@ -12,6 +12,7 @@ random.seed(1738)
 
 # Main loop
 def run_simulation(reg_n_, error_std_, a, b, show_plots):
+    
     running = True
     steps = 0
 
@@ -101,8 +102,8 @@ def run_simulation(reg_n_, error_std_, a, b, show_plots):
         x_plt = np.arange(1, len(ground_truth)+1)
         plt.scatter(x_plt, ground_truth, c = (0, 0, 1), label = "Ground Truth", s = size)
         plt.scatter(x_plt, naive_preds, color = "black", label = "Noisy Observation", s = size)
-        plt.scatter(x_plt, kalman_preds, c = (1, 0, 0), label = "Kalman Prediction", s = size)
         plt.scatter(x_plt, reg_preds, c = (0, 1, 1), label = "Regression Prediction", s = size)
+        plt.scatter(x_plt, kalman_preds, c = (1, 0, 0), label = "Kalman Prediction", s = size)
 
         plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
         plt.subplots_adjust(right=0.75)
@@ -117,8 +118,8 @@ def run_simulation(reg_n_, error_std_, a, b, show_plots):
         size = 3
         plt.scatter(x_plt, x_plt - x_plt, c=(0, 0, 1), s = size)
         plt.scatter(x_plt, naive_error, color = "black", label = "Observation Error", s = size)
-        plt.scatter(x_plt, kalman_error, c = (1, 0, 0), label = "Kalman Error", s = size)
         plt.scatter(x_plt, reg_error, c = (0, 1, 1), label = "Regression Error", s = size)
+        plt.scatter(x_plt, kalman_error, c = (1, 0, 0), label = "Kalman Error", s = size)
 
         plt.suptitle("Plot of Error vs Time")
         plt.title(f'For last_n: {g_reg_n} and Error Std: {error_std}')
@@ -156,5 +157,7 @@ print(error_df)
 
 
 
-run_simulation(g_reg_n_arr, error_std_arr, 2, 2, True)
+run_simulation(g_reg_n_arr, error_std_arr, 1, 2, True)
 
+
+error_df.to_csv("error.csv", index=False)
