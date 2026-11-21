@@ -33,7 +33,7 @@ F = np.array([[1, dt],  # State transition matrix
 P_est = np.array([[10, 0],   # Process covariance matrix
                   [0, 1000]])
 H = np.array([1, 0])         # Map hidden state to observation
-q = 1e6
+q = 1e5
 Q = q * np.array([[0.25 * dt**4, 0.5 * dt**3],       # Process noise covariance matrix
               [0.5 * dt**3, dt**2]])
 R = error_std ** 2
@@ -121,10 +121,10 @@ while running:
     reg_error.append(x_true[0] - reg_pred)
 
     pygame.draw.circle(screen, (0, 0, 255), (500, x_true[0]), 20) # Draw ground truth
-    pygame.draw.circle(screen, (255, 255, 255), (500, z), 5)      # Draw  noise
-    pygame.draw.circle(screen, (255, 0, 0), (500, x_est[0]), 5)  # Draw estimate
-    pygame.draw.circle(screen, (0, 255, 0), (500, ma_pred), 5)  # Draw moving average estimate
-    pygame.draw.circle(screen, (0, 255, 255), (500, reg_pred), 10)  # Draw regression estimate        
+    pygame.draw.circle(screen, (255, 255, 255), (490, z), 5)      # Draw  noise
+    pygame.draw.circle(screen, (255, 0, 0), (480, x_est[0]), 5)  # Draw estimate
+    pygame.draw.circle(screen, (0, 255, 0), (470, ma_pred), 5)  # Draw moving average estimate
+    pygame.draw.circle(screen, (0, 255, 255), (460, reg_pred), 10)  # Draw regression estimate        
 
     # Draw the fps
     fps_text = font.render(f"FPS: {clock.get_fps():.0f}", True, (255, 255, 255))
