@@ -29,7 +29,7 @@ dt = 1/60
 error_std = 30
 x_est = np.array([295, 100]) # Our initial estimate
 F = np.array([[1, dt],  # State transition matrix
-              [0, 0.99]])
+              [0, 1]])
 P_est = np.array([[10, 0],   # Process covariance matrix
                   [0, 1000]])
 H = np.array([1, 0])         # Map hidden state to observation
@@ -62,11 +62,16 @@ last_recorded_time = pygame.time.get_ticks()
 running = True
 steps = 0
 
+max_steps = 150
+count_max = True
+
 while running: 
     events = pygame.event.get()
     # Handle events (such as clicking the window close button)
     for event in events:
         if event.type == pygame.QUIT:
+            running = False
+        if (count_max) and (steps >= max_steps):
             running = False
 
     # Fill the screen with white (RGB)
@@ -74,9 +79,9 @@ while running:
     #output.setText(slider.getValue())
  
     # Update the hidden state
-    _, mouse_y = pygame.mouse.get_pos()
-    #x_true = F @ x_true
-    x_true[0] = mouse_y
+    #_, mouse_y = pygame.mouse.get_pos()
+    x_true = F @ x_true
+    #x_true[0] = mouse_y
 
     # Predict Step: Update estimate and process covariance
     x_pred = F @ x_est
@@ -91,7 +96,7 @@ while running:
     P_est = (np.eye(2) - np.outer(K, H)) @ P_pred # Process covariance estimate
 
     # Record
-    ground_truth.append(x_true) 
+    ground_truth.append(x_true[0]) 
     observations.append(z)
     
     # Moving Average
@@ -99,7 +104,6 @@ while running:
     last_n = np.array(observations[-ma_n:])
     average_velocity = np.mean(last_n - np.array(observations[-(ma_n+1):-1]))
     ma_pred = np.mean(last_n) + ((ma_n-1)/2)*average_velocity
-    ma_error.append(x_true - ma_pred)
     
     # Linear Regression
     reg_n = min(g_reg_n, len(observations))
@@ -110,13 +114,14 @@ while running:
     reg_pred = model.predict([[reg_n]])[0]
             
     #Preds
-    kalman_preds.append(x_est[0])
     naive_preds.append(z)
+    kalman_preds.append(x_est[0])
     ma_preds.append(ma_pred)
     reg_preds.append(reg_pred)
               
     # Error
     naive_error.append(x_true[0] - z)
+    kalman_error.append(x_true[0] - x_est[0])
     ma_error.append(x_true[0] - ma_pred)
     reg_error.append(x_true[0] - reg_pred)
 
@@ -139,13 +144,27 @@ while running:
 # 3. Clean up and exit
 pygame.quit()
 
-
+size = 3
 x_plt = np.arange(1, len(ground_truth)+1)
-plt.scatter(x_plt, ground_truth, c = (0, 0, 1), label = "Ground Truth")
-plt.scatter(x_plt, kalman_preds, c = (1, 0, 0), label = "Kalman Prediction")
-plt.scatter(x_plt, ma_preds, c = (0, 1, 0), label = "Moving Average Prediction")
-plt.scatter(x_plt, reg_preds, c = (0, 1, 1), label = "Regression Prediction")
+plt.scatter(x_plt, ground_truth, c = (0, 0, 1), label = "Ground Truth", s = size)
+plt.scatter(x_plt, kalman_preds, c = (1, 0, 0), label = "Kalman Prediction", s = size)
+#plt.scatter(x_plt, ma_preds, c = (0, 1, 0), label = "Moving Average Prediction", s = size)
+plt.scatter(x_plt, reg_preds, c = (0, 1, 1), label = "Regression Prediction", s = size)
 
-#plt.legend(loc='outside upper left')
+plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
+plt.subplots_adjust(right=0.75)
 
 plt.show()
+
+
+### Quantify Error
+v_naive_mse = np.sum(np.square(np.array(naive_error)))/len(naive_error)
+v_kalman_mse = np.sum(np.square(np.array(kalman_error)))/len(kalman_error)
+v_ma_mse = np.sum(np.square(np.array(ma_error)))/len(ma_error)
+v_reg_mse = np.sum(np.square(np.array(reg_error)))/len(reg_error)
+
+
+print("Naive Error: ", v_naive_mse)
+print("Kalman Error: ", v_kalman_mse)
+print("Moving Average Error: ", v_ma_mse)
+print("Regression Error: ", v_reg_mse)
