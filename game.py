@@ -7,6 +7,12 @@ from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import random
 
+
+####Adjustable Parameters####
+error_std = 30 # This is the standard error for the observations
+g_reg_n = 15 # We consider the last n timesteps for regression
+#############################
+
 # Height and width
 height = 1000
 width = 1500
@@ -26,7 +32,6 @@ x_true = np.array([300, 100])
 
 # Kalman Filter Initialization
 dt = 1/60
-error_std = 30
 x_est = np.array([295, 100]) # Our initial estimate
 F = np.array([[1, dt],  # State transition matrix
               [0, 1]])
@@ -54,7 +59,6 @@ ma_preds = []
 reg_preds = []
 
 g_ma_n = 15 # We consider the last n timesteps for moving average
-g_reg_n = 15 # We consider the last n timesteps for regression
 
 last_recorded_time = pygame.time.get_ticks()
 
@@ -63,7 +67,7 @@ running = True
 steps = 0
 
 max_steps = 150
-count_max = True
+count_max = False
 
 while running: 
     events = pygame.event.get()
@@ -79,9 +83,12 @@ while running:
     #output.setText(slider.getValue())
  
     # Update the hidden state
-    #_, mouse_y = pygame.mouse.get_pos()
-    x_true = F @ x_true
-    #x_true[0] = mouse_y
+    _, mouse_y = pygame.mouse.get_pos()
+    #x_true = F @ x_true
+    x_true[0] = mouse_y
+    
+    if (steps == 0):
+        x_est = np.array([mouse_y, 100]) # Our initial estimate
 
     # Predict Step: Update estimate and process covariance
     x_pred = F @ x_est
@@ -128,7 +135,7 @@ while running:
     pygame.draw.circle(screen, (0, 0, 255), (500, x_true[0]), 20) # Draw ground truth
     pygame.draw.circle(screen, (255, 255, 255), (490, z), 5)      # Draw  noise
     pygame.draw.circle(screen, (255, 0, 0), (480, x_est[0]), 5)  # Draw estimate
-    pygame.draw.circle(screen, (0, 255, 0), (470, ma_pred), 5)  # Draw moving average estimate
+    #pygame.draw.circle(screen, (0, 255, 0), (470, ma_pred), 5)  # Draw moving average estimate
     pygame.draw.circle(screen, (0, 255, 255), (460, reg_pred), 10)  # Draw regression estimate        
 
     # Draw the fps
@@ -148,11 +155,19 @@ size = 3
 x_plt = np.arange(1, len(ground_truth)+1)
 plt.scatter(x_plt, ground_truth, c = (0, 0, 1), label = "Ground Truth", s = size)
 plt.scatter(x_plt, kalman_preds, c = (1, 0, 0), label = "Kalman Prediction", s = size)
+plt.scatter(x_plt, naive_preds, color = "black", label = "Noisy Observation", s = size)
 #plt.scatter(x_plt, ma_preds, c = (0, 1, 0), label = "Moving Average Prediction", s = size)
 plt.scatter(x_plt, reg_preds, c = (0, 1, 1), label = "Regression Prediction", s = size)
 
 plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
 plt.subplots_adjust(right=0.75)
+
+plt.suptitle("Plot of Position vs Time")
+plt.title(f'For last_n: {g_reg_n} and Error Std: {error_std}')
+plt.xlabel('Timestep')
+plt.ylabel('Position (m)')
+
+
 
 plt.show()
 
@@ -166,5 +181,5 @@ v_reg_mse = np.sum(np.square(np.array(reg_error)))/len(reg_error)
 
 print("Naive Error: ", v_naive_mse)
 print("Kalman Error: ", v_kalman_mse)
-print("Moving Average Error: ", v_ma_mse)
+#print("Moving Average Error: ", v_ma_mse)
 print("Regression Error: ", v_reg_mse)

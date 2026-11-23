@@ -44,7 +44,7 @@ def run_simulation(reg_n_, error_std_, a, b, show_plots):
     P_est = np.array([[10, 0],   # Process covariance matrix
                   [0, 1000]])
     H = np.array([1, 0])         # Map hidden state to observation
-    q = 1e6
+    q = 1e5
     Q = q * np.array([[0.25 * dt**4, 0.5 * dt**3],       # Process noise covariance matrix
               [0.5 * dt**3, dt**2]])
     R = error_std ** 2
@@ -110,7 +110,7 @@ def run_simulation(reg_n_, error_std_, a, b, show_plots):
         plt.suptitle("Plot of Predictions and Actual vs Time")
         plt.title(f'For last_n: {g_reg_n} and Error Std: {error_std}')
         plt.xlabel('Timestep')
-        plt.ylabel('Position')
+        plt.ylabel('Position (m)')
 
         plt.show()
 
@@ -124,7 +124,7 @@ def run_simulation(reg_n_, error_std_, a, b, show_plots):
         plt.suptitle("Plot of Error vs Time")
         plt.title(f'For last_n: {g_reg_n} and Error Std: {error_std}')
         plt.xlabel('Timestep')
-        plt.ylabel('Error')
+        plt.ylabel('Error (m)')
         plt.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
         plt.subplots_adjust(right=0.75)
 
